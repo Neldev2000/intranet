@@ -13,13 +13,26 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X } from 'lucide-react'; // Assuming you're using lucide-react for icons
+import { X } from 'lucide-react';
 
-function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [responsibilities, setResponsibilities] = useState(['']);
-  const [qualifications, setQualifications] = useState(['']);
+interface AddPositionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: (position: {
+    name: string;
+    description: string;
+    responsibilities: string[];
+    qualifications: string[];
+    reportsTo: string;
+  }) => void;
+  existingNodes: any[]; // Replace 'any' with a more specific type if possible
+}
+
+function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }: AddPositionModalProps) {
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [responsibilities, setResponsibilities] = useState<string[]>(['']);
+  const [qualifications, setQualifications] = useState<string[]>(['']);
   const [reportsTo, setReportsTo] = useState('');
 
   const handleAddResponsibility = () => {
@@ -30,24 +43,24 @@ function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }) {
     setQualifications([...qualifications, '']);
   };
 
-  const handleResponsibilityChange = (index, value) => {
+  const handleResponsibilityChange = (index: number, value: string) => {
     const newResponsibilities = [...responsibilities];
     newResponsibilities[index] = value;
     setResponsibilities(newResponsibilities);
   };
 
-  const handleQualificationChange = (index, value) => {
+  const handleQualificationChange = (index: number, value: string) => {
     const newQualifications = [...qualifications];
     newQualifications[index] = value;
     setQualifications(newQualifications);
   };
 
-  const handleDeleteResponsibility = (index) => {
+  const handleDeleteResponsibility = (index: number) => {
     const newResponsibilities = responsibilities.filter((_, i) => i !== index);
     setResponsibilities(newResponsibilities);
   };
 
-  const handleDeleteQualification = (index) => {
+  const handleDeleteQualification = (index: number) => {
     const newQualifications = qualifications.filter((_, i) => i !== index);
     setQualifications(newQualifications);
   };
