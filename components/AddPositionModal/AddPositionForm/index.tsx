@@ -1,35 +1,26 @@
-'use client'
-
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 
 interface AddPositionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (position: {
-    name: string;
-    description: string;
-    responsibilities: string[];
-    qualifications: string[];
-    reports_to: string;
-  }) => void;
-  existingNodes: any[]; // Replace 'any' with a more specific type if possible
-}
 
-function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }: AddPositionModalProps) {
-  const [name, setName] = useState<string>('');
+    onClose: () => void;
+    onAdd: (position: {
+      name: string;
+      description: string;
+      responsibilities: string[];
+      qualifications: string[];
+      reports_to: string;
+    }) => void;
+    existingNodes: any[]; // Replace 'any' with a more specific type if possible
+  }
+
+export function AddPositionForm({onAdd, existingNodes, onClose }: AddPositionModalProps){
+    const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [responsibilities, setResponsibilities] = useState<string[]>(['']);
   const [qualifications, setQualifications] = useState<string[]>(['']);
@@ -79,15 +70,11 @@ function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }: AddPosition
     setResponsibilities(['']);
     setQualifications(['']);
     setReportsTo('');
+    onClose();
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] overflow-auto max-h-[700px] text-gray-600">
-        <DialogHeader>
-          <DialogTitle>Nuevo Cargo</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-6 py-4">
+    return (
+        <>
+            <div className="grid gap-6 py-4">
           <div className="flex flex-col justify-start items-start gap-4">
             <Label htmlFor="name" className="text-right text-xl font-medium">
               Nombre
@@ -177,13 +164,8 @@ function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }: AddPosition
               </Button>
             </div>
           </div>
-        </div>
-        <DialogFooter>
           <Button onClick={handleSubmit} className='bg-blue-700'>Crear</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+        </div>
+        </>
+    )
 }
-
-export default AddPositionModal;
