@@ -23,7 +23,7 @@ interface AddPositionModalProps {
     description: string;
     responsibilities: string[];
     qualifications: string[];
-    reportsTo: string;
+    reports_to: string;
   }) => void;
   existingNodes: any[]; // Replace 'any' with a more specific type if possible
 }
@@ -71,7 +71,7 @@ function AddPositionModal({ isOpen, onClose, onAdd, existingNodes }: AddPosition
       description,
       responsibilities: responsibilities.filter(r => r.trim() !== ''),
       qualifications: qualifications.filter(q => q.trim() !== ''),
-      reportsTo,
+      reports_to: reportsTo,
     });
     // Reset form
     setName('');

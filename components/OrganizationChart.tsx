@@ -26,39 +26,85 @@ function OrganizationChart() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Cargar los cargos iniciales
     fetch('/api/positions')
       .then(response => response.json())
       .then(data => {
-        console.log(data)
-        const newNodes = data.map((position: { id: any; label: any; description: any; responsibilities: any; qualifications: any; }) => ({
-          id: position.id,
-          data: { 
-            label: position.label,
-            description: position.description,
-            responsibilities: position.responsibilities,
-            qualifications: position.qualifications,
-          },
-          position: { x: Math.random() * 500, y: Math.random() * 300 },
-        }));
-        setNodes(newNodes);
-
-        // Crear edges basados en la estructura jerárquica (asumiendo que el CEO es el nodo raíz)
-        const newEdges = data
-          .filter((position: { id: string; }) => position.id !== '1')
-          .map((position: { id: any; }) => ({
-            id: `e1-${position.id}`,
-            source: '1',
-            target: position.id,
-            markerEnd: { type: MarkerType.ArrowClosed },
-          }));
-        setEdges(newEdges);
+        const organizedData = organizeHierarchy(data);
+        setNodes(organizedData.nodes);
+        setEdges(organizedData.edges);
       });
   }, []);
 
+  const organizeHierarchy = (data: any[]) => {
+    const nodeMap = new Map();
+    const nodes: any[] = [];
+    const edges: { id: string; source: string; target: string; type: string; }[] = [];
+
+    // Create nodes
+    data.forEach(position => {
+      const node = {
+        id: position.id.toString(),
+        data: { 
+          label: position.label,
+          description: position.description,
+          responsibilities: position.responsibilities,
+          qualifications: position.qualifications,
+        },
+        position: { x: 0, y: 0 },
+      };
+      nodes.push(node);
+      nodeMap.set(position.id.toString(), node);
+    });
+
+    // Create edges
+    data.forEach(position => {
+      if (position.reports_to) {
+        edges.push({
+          id: `e${position.reports_to}-${position.id}`,
+          source: position.reports_to.toString(),
+          target: position.id.toString(),
+          type: 'smoothstep',  // This creates a curved line
+        });
+      }
+    });
+
+    // Position nodes in a tree structure
+    const levelWidth = 300;
+    const levelHeight = 150;
+
+    const positionNode = (nodeId: string, level = 0, horizontalIndex = 0) => {
+      const node = nodeMap.get(nodeId);
+      if (!node) return;
+
+      node.position = {
+        x: horizontalIndex * levelWidth,
+        y: level * levelHeight
+      };
+
+      const children = data.filter(p => p.reports_to?.toString() === nodeId);
+      children.forEach((child, index) => {
+        positionNode(child.id.toString(), level + 1, horizontalIndex + index);
+      });
+    };
+
+    // Find root nodes and position the tree
+    const rootNodes = data.filter(p => !p.reports_to);
+    rootNodes.forEach((rootNode, index) => {
+      positionNode(rootNode.id.toString(), 0, index);
+    });
+
+    // Center the tree horizontally
+    const minX = Math.min(...nodes.map(node => node.position.x));
+    const maxX = Math.max(...nodes.map(node => node.position.x));
+    const centerX = (minX + maxX) / 2;
+    nodes.forEach(node => {
+      node.position.x -= centerX;
+    });
+
+    return { nodes, edges };
+  };
+
   const onNodeClick = (event: React.MouseEvent, node: Node) => {
-    // Aquí deberías abrir el NodeModal
-    // Por ejemplo:
     console.log("Hi", node)
     setSelectedNode(node);
     setIsModalOpen(true);
@@ -72,7 +118,7 @@ function OrganizationChart() {
     setIsAddModalOpen(true);
   };
 
-  const onAddPosition = (newPosition: { reportsTo: any; }) => {
+  const onAddPosition = (newPosition: { reports_to: any; }) => {
     fetch('/api/positions', {
       method: 'POST',
       headers: {
@@ -94,10 +140,10 @@ function OrganizationChart() {
         };
         setNodes((nds) => nds.concat(newNode));
 
-        if (newPosition.reportsTo) {
+        if (newPosition.reports_to) {
           const newEdge = {
-            id: `e${newPosition.reportsTo}-${data.id}`,
-            source: newPosition.reportsTo,
+            id: `e${newPosition.reports_to}-${data.id}`,
+            source: newPosition.reports_to,
             target: data.id,
             markerEnd: { type: MarkerType.ArrowClosed },
           };

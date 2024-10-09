@@ -23,12 +23,12 @@ export async function POST(request: Request) {
   try {
     const newPosition = await request.json();
     console.log(newPosition)
-    const { name, description, responsibilities, qualifications, reportsTo } = newPosition;
+    const { name, description, responsibilities, qualifications, reports_to } = newPosition;
     
 
     const { rows } = await sql`
       INSERT INTO positions (label, description, responsibilities, qualifications, reports_to)
-      VALUES (${name}, ${description}, ${responsibilities}, ${qualifications}, ${reportsTo.length>0? reportsTo : null})
+      VALUES (${name}, ${description}, ${responsibilities}, ${qualifications}, ${reports_to.length>0? reports_to : null})
       RETURNING *
     `;
     
