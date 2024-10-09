@@ -119,8 +119,17 @@ function OrganizationChart() {
   };
 
   return (
-    <div style={{ height: '80vh', width: '100%' }}>
-      <Button onClick={handleAddPosition} className="mt-4 bg-blue-700">Agregar Cargo</Button>
+    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
+      {/*Floating header*/}
+      <div className='absolute top-4 left-4 right-4 z-10 flex justify-between items-center'>
+        <div className=' px-4 py-2 bg-white rounded-lg shadow-md flex justify-start items-center'>
+          <h1 className="text-3xl font-medium  text-gray-600 ">Organigrama de 1Click</h1>
+
+        </div>
+      
+      <Button onClick={handleAddPosition} className="bg-blue-700">Agregar Cargo</Button>
+      </div>
+          
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -128,6 +137,7 @@ function OrganizationChart() {
         onEdgesChange={onEdgesChange}
         onNodeClick={(event, node) => onNodeClick(event, node as unknown as Node)}
         fitView
+        style={{ width: '100%', height: '100%' }}
       >
         <Controls />
         <MiniMap />
