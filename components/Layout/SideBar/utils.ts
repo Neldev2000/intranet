@@ -2,8 +2,10 @@
 
 import { sql } from "@vercel/postgres"
 import { Employee } from "./interface"
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function getAllEmployees() {
+    noStore();
     try {
         const { rows } = await sql`select
                                 employees.id,
