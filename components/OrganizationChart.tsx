@@ -173,9 +173,9 @@ function OrganizationChart() {
   return (
     <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
       {/*Floating header*/}
-      <div className='absolute top-4 left-4 right-4 z-10 flex justify-between items-center'>
+      <div className='absolute top-4 left-4 right-4 z-10 flex flex-col md:flex-row justify-start md:justify-between items-start md:items-center gap-4'>
         <div className=' px-4 py-2 bg-white rounded-lg shadow-md flex justify-start items-center'>
-          <h1 className="text-3xl font-medium  text-gray-600 ">Organigrama de 1Click</h1>
+          <h1 className="text-xl md:text-3xl font-medium  text-gray-600 ">Organigrama de 1Click</h1>
 
         </div>
       
