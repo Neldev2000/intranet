@@ -1,6 +1,7 @@
 "use server"
 
 import { sql } from "@vercel/postgres";
+import { revalidatePath } from "next/cache";
 
 export async function actionCreateEmployee(values: {name: string; position: string}) {
     try {
@@ -26,7 +27,7 @@ export async function actionCreateEmployee(values: {name: string; position: stri
         `;
 
         const newEmployee = result.rows[0];
-
+        revalidatePath('/')
         return {
             error: false,
             message: "Empleado creado exitosamente",
