@@ -30,6 +30,7 @@ function OrganizationChart() {
     fetch('/api/positions')
       .then(response => response.json())
       .then(data => {
+        console.log(data)
         const newNodes = data.map((position: { id: any; label: any; description: any; responsibilities: any; qualifications: any; }) => ({
           id: position.id,
           data: { 
