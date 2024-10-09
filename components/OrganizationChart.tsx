@@ -118,6 +118,12 @@ function OrganizationChart() {
     // Handle edge click
   };
 
+  const handleDeleteNode = (nodeId: string) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    // También deberías eliminar las aristas conectadas a este nodo
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+  };
+
   return (
     <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
       {/*Floating header*/}
@@ -149,6 +155,7 @@ function OrganizationChart() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           node={selectedNode}
+          onDelete={handleDeleteNode}
         />
       )}
       <AddPositionModal

@@ -6,11 +6,30 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
-function NodeModal({ isOpen, onClose, node }: { isOpen: boolean; onClose: () => void; node: any }) {
-  console.log(isOpen,node )
+function NodeModal({ isOpen, onClose, node, onDelete }: { isOpen: boolean; onClose: () => void; node: any; onDelete: (nodeId: string) => void }) {
   if (!node) return null;
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/delete-position?id=${node.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete position');
+      }
+
+      onDelete(node.id);
+      onClose();
+    } catch (error) {
+      console.error('Error deleting position:', error);
+      // Aquí puedes agregar una notificación de error si lo deseas
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -38,6 +57,11 @@ function NodeModal({ isOpen, onClose, node }: { isOpen: boolean; onClose: () => 
             ))}
           </ul>
         </div>
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleDelete}>
+            Eliminar Cargo
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
