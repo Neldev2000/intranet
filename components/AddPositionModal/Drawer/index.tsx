@@ -27,7 +27,7 @@ export function DrawerAddPosition({ isOpen, onClose, onAdd, existingNodes }: Dra
         <DrawerHeader>
           <DrawerTitle>Nuevo Cargo</DrawerTitle>
         </DrawerHeader>
-        <AddPositionForm onAdd={onAdd} existingNodes={existingNodes} onClose={onClose} />
+        <AddPositionForm  existingPositions={existingNodes} onClose={onClose} />
       </DrawerContent>
     </Drawer>
   );

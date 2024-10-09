@@ -21,13 +21,14 @@ interface DialogAddPositionProps {
 }
 
 export function DialogAddPosition({ isOpen, onClose, onAdd, existingNodes }: DialogAddPositionProps) {
+    console.log(existingNodes)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] overflow-auto max-h-[700px] text-gray-600">
         <DialogHeader>
           <DialogTitle>Nuevo Cargo</DialogTitle>
         </DialogHeader>
-        <AddPositionForm onAdd={onAdd} existingNodes={existingNodes} onClose={onClose} />
+        <AddPositionForm  existingPositions={existingNodes} onClose={onClose} />
       </DialogContent>
     </Dialog>
   );

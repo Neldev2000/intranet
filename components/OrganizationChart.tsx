@@ -18,7 +18,9 @@ import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-function OrganizationChart() {
+function OrganizationChart({
+  positions
+}: {positions:any[]}) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -26,14 +28,10 @@ function OrganizationChart() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/positions')
-      .then(response => response.json())
-      .then(data => {
-        const organizedData = organizeHierarchy(data);
+    const organizedData = organizeHierarchy(positions);
         setNodes(organizedData.nodes);
         setEdges(organizedData.edges);
-      });
-  }, []);
+  }, [positions]);
 
   const organizeHierarchy = (data: any[]) => {
     const nodeMap = new Map();

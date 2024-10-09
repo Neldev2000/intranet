@@ -1,13 +1,17 @@
-import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
+import { obtenerPosiciones } from './utils';
+import OrganizationChart from '@/components/OrganizationChart';
 
-const OrganizationChart = dynamic(() => import('@/components/OrganizationChart'), { ssr: false });
-
-export default function Home() {
+export default async function Home() {
+  const {error, message, data} = await obtenerPosiciones()
+  if(error || !data) {
+    return <div>
+      {message}
+    </div>
+  }
   return (
     <div className="  ">
-  
-      <OrganizationChart />
+      
+      <OrganizationChart positions={data} />
     </div>
   );
 }

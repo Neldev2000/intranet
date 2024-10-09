@@ -1,171 +1,184 @@
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import React from 'react';
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from 'lucide-react';
+import { actionCreatePosition } from './actions';
 
-interface AddPositionModalProps {
+// Define el esquema de validación con Zod
+const formSchema = z.object({
+  label: z.string().min(1, "El nombre es requerido"),
+  description: z.string().min(1, "La descripción es requerida"),
+  responsibilities: z.array(z.object({
+    descripcion:z.string()
+  }
+    
+  )).min(1, "Al menos una responsabilidad es requerida"),
+  qualifications: z.array(z.object({
+    descripcion:z.string()
+  })).min(1, "Al menos una calificación es requerida"),
+  reports_to: z.string(),
+});
 
-    onClose: () => void;
-    onAdd: (position: {
-      name: string;
-      description: string;
-      responsibilities: string[];
-      qualifications: string[];
-      reports_to: string;
-    }) => void;
-    existingNodes: any[]; // Replace 'any' with a more specific type if possible
+// Tipo inferido del esquema
+type FormValues = z.infer<typeof formSchema>;
+
+// Props del componente
+interface AddPositionFormProps {
+  existingPositions: { id: string; data: {label:string, description:string}}[];
+
+  onClose: () => void;
+}
+
+export function AddPositionForm({ existingPositions, onClose }: AddPositionFormProps) {
+  // Inicializar el formulario con React Hook Form
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      label: "",
+      description: "",
+      responsibilities: [],
+      qualifications: [],
+      reports_to: "",
+    },
+  });
+
+  // Configurar useFieldArray para responsabilidades y calificaciones
+  const { fields: responsibilityFields, append: appendResponsibility, remove: removeResponsibility } = useFieldArray({
+    control: form.control,
+    name: "responsibilities",
+  });
+
+  const { fields: qualificationFields, append: appendQualification, remove: removeQualification } = useFieldArray({
+    control: form.control,
+    name: "qualifications",
+  });
+
+  async function onSubmit(values: FormValues) {
+    await actionCreatePosition(values);
+    form.reset();
+    onClose();
   }
 
-export function AddPositionForm({onAdd, existingNodes, onClose }: AddPositionModalProps){
-    const [name, setName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [responsibilities, setResponsibilities] = useState<string[]>(['']);
-  const [qualifications, setQualifications] = useState<string[]>(['']);
-  const [reportsTo, setReportsTo] = useState('');
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="label"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del puesto</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej. Gerente de Ventas" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-  const handleAddResponsibility = () => {
-    setResponsibilities([...responsibilities, '']);
-  };
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción del puesto</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Breve descripción de las responsabilidades generales..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-  const handleAddQualification = () => {
-    setQualifications([...qualifications, '']);
-  };
+        <FormField
+          control={form.control}
+          name="reports_to"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reporta a</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un superior" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {existingPositions.map((position) => (
+                    <SelectItem key={position.id} value={position.id}>
+                      {position.data.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-  const handleResponsibilityChange = (index: number, value: string) => {
-    const newResponsibilities = [...responsibilities];
-    newResponsibilities[index] = value;
-    setResponsibilities(newResponsibilities);
-  };
-
-  const handleQualificationChange = (index: number, value: string) => {
-    const newQualifications = [...qualifications];
-    newQualifications[index] = value;
-    setQualifications(newQualifications);
-  };
-
-  const handleDeleteResponsibility = (index: number) => {
-    const newResponsibilities = responsibilities.filter((_, i) => i !== index);
-    setResponsibilities(newResponsibilities);
-  };
-
-  const handleDeleteQualification = (index: number) => {
-    const newQualifications = qualifications.filter((_, i) => i !== index);
-    setQualifications(newQualifications);
-  };
-
-  const handleSubmit = () => {
-    onAdd({
-      name,
-      description,
-      responsibilities: responsibilities.filter(r => r.trim() !== ''),
-      qualifications: qualifications.filter(q => q.trim() !== ''),
-      reports_to: reportsTo,
-    });
-    // Reset form
-    setName('');
-    setDescription('');
-    setResponsibilities(['']);
-    setQualifications(['']);
-    setReportsTo('');
-    onClose();
-  };
-    return (
-        <>
-            <div className="grid gap-6 py-4">
-          <div className="flex flex-col justify-start items-start gap-4">
-            <Label htmlFor="name" className="text-right text-xl font-medium">
-              Nombre
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="col-span-3 border-2 border-gray-300"
-            />
-          </div>
-          <div className="flex flex-col justify-start items-start gap-4">
-            <Label htmlFor="reportsTo" className="text-right text-xl font-medium">
-              Reporta a
-            </Label>
-            <Select onValueChange={setReportsTo} value={reportsTo}>
-              <SelectTrigger className="col-span-3 border-2 border-gray-300">
-                <SelectValue placeholder="Seleccione un cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                {existingNodes.map((node) => (
-                  <SelectItem key={node.id} value={node.id}>
-                    {node.data.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col justify-start items-start gap-4">
-            <Label htmlFor="description" className="text-right text-xl font-medium">
-              Descripción
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="col-span-3 col-span-3 border-2 border-gray-300"
-            />
-          </div>
-          <div className="flex flex-col justify-start items-start gap-4">
-            <Label className="text-right text-xl font-medium">Responsabilidades</Label>
-            <div className="col-span-3 space-y-2 w-full">
-              {responsibilities.map((responsibility, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Input
-                    value={responsibility}
-                    className='flex-grow border-2 border-gray-300'
-                    onChange={(e) => handleResponsibilityChange(index, e.target.value)}
-                  />
-                  <Button 
-                    onClick={() => handleDeleteResponsibility(index)} 
-                    variant="ghost" 
-                    size="icon"
-                    className="text-red-500"
-                  >
-                    <X size={20} />
+        <div>
+          <FormLabel>Responsabilidades</FormLabel>
+          {responsibilityFields.map((field, index) => (
+            <FormField
+              key={field.id}
+              control={form.control}
+              name={`responsibilities.${index}.descripcion`}
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2 mt-2">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeResponsibility(index)}>
+                    <X className="h-4 w-4" />
                   </Button>
-                </div>
-              ))}
-              <Button onClick={handleAddResponsibility} variant="outline" size="sm">
-                + Agregar Responsabilidad
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-col justify-start items-start gap-4 ">
-            <Label className="text-right text-xl font-medium">Calificaciones</Label>
-            <div className="col-span-3 space-y-2 w-full">
-              {qualifications.map((qualification, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Input
-                    value={qualification}
-                    className='flex-grow border-2 border-gray-300'
-                    onChange={(e) => handleQualificationChange(index, e.target.value)}
-                  />
-                  <Button 
-                    onClick={() => handleDeleteQualification(index)} 
-                    variant="ghost" 
-                    size="icon"
-                    className="text-red-500"
-                  >
-                    <X size={20} />
-                  </Button>
-                </div>
-              ))}
-              <Button onClick={handleAddQualification} variant="outline" size="sm">
-                + Agregar Calificación
-              </Button>
-            </div>
-          </div>
-          <Button onClick={handleSubmit} className='bg-blue-700'>Crear</Button>
+                </FormItem>
+              )}
+            />
+          ))}
+          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendResponsibility({
+            descripcion:""
+          })}>
+            Agregar Responsabilidad
+          </Button>
+          <FormMessage>{form.formState.errors.responsibilities?.message}</FormMessage>
         </div>
-        </>
-    )
+
+        <div>
+          <FormLabel>Calificaciones</FormLabel>
+          {qualificationFields.map((field, index) => (
+            <FormField
+              key={field.id}
+              control={form.control}
+              name={`qualifications.${index}.descripcion`}
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2 mt-2">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeQualification(index)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </FormItem>
+              )}
+            />
+          ))}
+          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendQualification({
+            descripcion:""
+          })}>
+            Agregar Calificación
+          </Button>
+          <FormMessage>{form.formState.errors.qualifications?.message}</FormMessage>
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button type="submit" className='bg-blue-600 text-white'>Crear Posición</Button>
+        </div>
+      </form>
+    </Form>
+  );
 }
