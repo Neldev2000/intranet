@@ -33,17 +33,17 @@ function NodeModal({ isOpen, onClose, node, onDelete }: { isOpen: boolean; onClo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className='text-gray-500'>
         <DialogHeader>
           <DialogTitle>{node.data.label}</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <h3 className="text-lg font-semibold">Acerca del Cargo:</h3>
-          <p>{node.data.description}</p>
+          <p className='text-gray-400'>{node.data.description}</p>
         </div>
         <div className="mt-4">
           <h3 className="text-lg font-semibold">Responsabilidades:</h3>
-          <ul className="list-disc pl-5">
+          <ul className="list-disc pl-5 text-gray-400">
             {node.data.responsibilities.map((resp: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined, index: React.Key | null | undefined) => (
               <li key={index}>{resp}</li>
             ))}
@@ -51,7 +51,7 @@ function NodeModal({ isOpen, onClose, node, onDelete }: { isOpen: boolean; onClo
         </div>
         <div className="mt-4">
           <h3 className="text-lg font-semibold">Calificaciones:</h3>
-          <ul className="list-disc pl-5">
+          <ul className="list-disc pl-5 text-gray-400">
             {node.data.qualifications.map((qual: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined, index: React.Key | null | undefined) => (
               <li key={index}>{qual}</li>
             ))}
