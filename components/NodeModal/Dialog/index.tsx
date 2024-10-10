@@ -65,16 +65,16 @@ export function DialogNode({ isOpen, onClose, node, handleDelete }: { isOpen: bo
                     </ul>
                 </div>
                 <div className="mt-4">
-                    <h3 className="text-lg font-semibold">Archivos adjuntos:</h3>
+                    <h3 className="text-lg font-semibold">Formatos con los que trabaja</h3>
                     {files.length > 0 ? (
-                        <ul className="list-disc pl-5 text-gray-400">
+                        <ul className="mt-2 text-sm grid grid-cols-2 gap-3">
                             {files.map((file, index) => (
-                                <li key={index}>
+                                <li key={index} className="p-3 rounded-md bg-gray-300">
                                     <a 
                                         href={file.url} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        className="text-blue-500 hover:underline"
+                                        className="text-gray-500 font-medium "
                                         download
                                     >
                                         {file.name}
