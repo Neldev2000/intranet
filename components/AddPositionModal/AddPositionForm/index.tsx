@@ -9,16 +9,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from 'lucide-react';
 import { actionCreatePosition } from './actions';
-
+import { useDropzone } from 'react-dropzone';
 // Define el esquema de validación con Zod
 const formSchema = z.object({
   label: z.string().min(1, "El nombre es requerido"),
+  files: z.array(z.any()).optional(),
   description: z.string().min(1, "La descripción es requerida"),
   responsibilities: z.array(z.object({
     descripcion:z.string()
-  }
-    
-  )).min(1, "Al menos una responsabilidad es requerida"),
+  })).min(1, "Al menos una responsabilidad es requerida"),
   qualifications: z.array(z.object({
     descripcion:z.string()
   })).min(1, "Al menos una calificación es requerida"),
@@ -26,7 +25,6 @@ const formSchema = z.object({
 });
 
 // Tipo inferido del esquema
-type FormValues = z.infer<typeof formSchema>;
 
 // Props del componente
 interface AddPositionFormProps {
@@ -34,6 +32,15 @@ interface AddPositionFormProps {
 
   onClose: () => void;
 }
+type FormValues = {
+    label: string;
+    description: string;
+    responsibilities: { descripcion: string }[];
+    qualifications: { descripcion: string }[];
+    reports_to: string;
+    files: File[];
+  };
+  
 
 export function AddPositionForm({ existingPositions, onClose }: AddPositionFormProps) {
   // Inicializar el formulario con React Hook Form
@@ -45,8 +52,16 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
       responsibilities: [],
       qualifications: [],
       reports_to: "",
+      files: []
     },
   });
+  // Configurar react-dropzone
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      form.setValue('files', acceptedFiles);
+    },
+  });
+
 
   // Configurar useFieldArray para responsabilidades y calificaciones
   const { fields: responsibilityFields, append: appendResponsibility, remove: removeResponsibility } = useFieldArray({
@@ -60,9 +75,11 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
   });
 
   async function onSubmit(values: FormValues) {
-    await actionCreatePosition(values);
-    form.reset();
-    onClose();
+    
+  
+      await actionCreatePosition(values);
+      form.reset();
+      onClose();
   }
 
   return (
@@ -173,6 +190,21 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
             Agregar Calificación
           </Button>
           <FormMessage>{form.formState.errors.qualifications?.message}</FormMessage>
+        </div>
+
+        <div>
+          <FormLabel>Archivos adjuntos</FormLabel>
+          <div {...getRootProps()} className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-blue-500 duration-150">
+            <input {...getInputProps()} />
+            <p>Arrastra y suelta archivos aquí, o haz clic para seleccionar archivos.  </p>
+          </div>
+          {acceptedFiles.length > 0 && (
+            <ul className="mt-2 text-sm grid grid-cols-2 gap-3">
+              {acceptedFiles.map((file) => (
+                <li key={file.name} className='p-3 bg-gray-300 font-medium rounded-md text-sm'>{file.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="flex justify-end space-x-2">
