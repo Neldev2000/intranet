@@ -75,6 +75,7 @@ export function DialogNode({ isOpen, onClose, node, handleDelete }: { isOpen: bo
                                         target="_blank" 
                                         rel="noopener noreferrer" 
                                         className="text-blue-500 hover:underline"
+                                        download
                                     >
                                         {file.name}
                                     </a>

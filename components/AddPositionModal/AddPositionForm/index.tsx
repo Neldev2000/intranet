@@ -10,16 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { X } from 'lucide-react';
 import { actionCreatePosition } from './actions';
 import { useDropzone } from 'react-dropzone';
+import { ActionData } from './interface';
 // Define el esquema de validación con Zod
 const formSchema = z.object({
   label: z.string().min(1, "El nombre es requerido"),
-  files: z.array(z.any()).optional(),
+  files: z.array(z.instanceof(File)).optional(),
   description: z.string().min(1, "La descripción es requerida"),
   responsibilities: z.array(z.object({
-    descripcion:z.string()
+    descripcion: z.string()
   })).min(1, "Al menos una responsabilidad es requerida"),
   qualifications: z.array(z.object({
-    descripcion:z.string()
+    descripcion: z.string()
   })).min(1, "Al menos una calificación es requerida"),
   reports_to: z.string(),
 });
@@ -74,12 +75,22 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
     name: "qualifications",
   });
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(data: FormValues) {
+    const formData = new FormData();
+    formData.append('label', data.label);
+    formData.append('description', data.description);
+    formData.append('responsibilities', JSON.stringify(data.responsibilities.map(r => r.descripcion)));
+    formData.append('qualifications', JSON.stringify(data.qualifications.map(q => q.descripcion)));
+    formData.append('reports_to', data.reports_to);
     
+    // Agregar archivos
+    if (data.files) {
+      data.files.forEach(file => formData.append('files', file));
+    }
   
-      await actionCreatePosition(values);
-      form.reset();
-      onClose();
+    const result = await actionCreatePosition(formData);
+    form.reset();
+    onClose();
   }
 
   return (
