@@ -57,6 +57,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: 'Position deleted successfully' }, { status: 200 });
   } catch (error) {
     console.error('Error deleting position:', error);
-    return { success: false, message: (error as Error).message || 'Error deleting position' };
+    return NextResponse.json({ success: false, message: (error as Error).message || 'Error deleting position' });
   }
 }
