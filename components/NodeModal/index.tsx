@@ -6,7 +6,7 @@ import { DialogNode } from './Dialog';
 import { DrawerNode } from './Drawer';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-function NodeModal({ isOpen, onClose, node, onDelete }: { isOpen: boolean; onClose: () => void; node: any; onDelete: (nodeId: string) => void }) {
+function NodeModal({ isOpen, onClose, node, positions, onDelete }: { isOpen: boolean; onClose: () => void; node: any; onDelete: (nodeId: string) => void; positions: any[] }) {
   if (!node) return null;
   const isMobile = useMediaQuery('(max-width: 767px)');
 
@@ -29,12 +29,15 @@ function NodeModal({ isOpen, onClose, node, onDelete }: { isOpen: boolean; onClo
     }
   };
   const NodeComponent = isMobile ? DrawerNode : DialogNode;
+
   return (
     <NodeComponent
       isOpen={isOpen}
       onClose={onClose}
       node={node}
+      positions={positions}
       handleDelete={handleDelete}
+      
     />
   );
 }

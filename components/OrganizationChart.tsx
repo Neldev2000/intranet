@@ -45,11 +45,13 @@ function OrganizationChart({
         data: { 
           label: position.label,
           description: position.description,
-          responsibilities: position.responsibilities,
+          currentFunctions: position.current_functions,
+          adquiredResposibilities: position.adquired_responsabilities,
           qualifications: position.qualifications,
         },
         position: { x: 0, y: 0 },
       };
+      console.log(node)
       nodes.push(node);
       nodeMap.set(position.id.toString(), node);
     });
@@ -200,6 +202,7 @@ function OrganizationChart({
           onClose={() => setIsModalOpen(false)}
           node={selectedNode}
           onDelete={handleDeleteNode}
+          positions = {positions}
         />
       )}
       <AddPositionModal

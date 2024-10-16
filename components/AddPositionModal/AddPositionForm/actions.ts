@@ -10,20 +10,21 @@ export async function actionCreatePosition(formData: FormData) {
     // Extraer datos del formulario
     const label = formData.get('label') as string;
     const description = formData.get('description') as string;
-    const responsibilities = JSON.parse(formData.get('responsibilities') as string) as string[];
+    const currentFunctions = JSON.parse(formData.get('currentFunctions') as string) as string[];
+    const acquiredResponsibilities = JSON.parse(formData.get('acquiredResponsibilities') as string) as string[];
     const qualifications = JSON.parse(formData.get('qualifications') as string) as string[];
     const reports_to = formData.get('reports_to') as string;
     const files = formData.getAll('files') as File[];
 
     // Validación básica
-    if (!label || !description || !Array.isArray(responsibilities) || !Array.isArray(qualifications)) {
+    if (!label || !description || !Array.isArray(currentFunctions) || !Array.isArray(acquiredResponsibilities) || !Array.isArray(qualifications)) {
       throw new Error('Faltan campos requeridos o tienen un formato incorrecto');
     }
 
     // Insertar en la base de datos
     const { rows } = await sql`
-      INSERT INTO positions (label, description, responsibilities, qualifications, reports_to)
-      VALUES (${label}, ${description}, ${responsibilities as any}, ${qualifications as any}, ${reports_to || null})
+      INSERT INTO positions (label, description, current_functions, acquired_responsabilities, qualifications, reports_to)
+      VALUES (${label}, ${description}, ${currentFunctions as any}, ${acquiredResponsibilities as any}, ${qualifications as any}, ${reports_to || null})
       RETURNING id
     `;
 

@@ -1,20 +1,17 @@
 import React from 'react';
-import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X } from 'lucide-react';
-import { actionCreatePosition } from './actions';
-import { useDropzone } from 'react-dropzone';
-import { ActionData } from './interface';
-// Define el esquema de validación con Zod
+import { X } from "lucide-react";
+import { actionUpdatePosition } from "./actions";
+
 const formSchema = z.object({
   label: z.string().min(1, "El nombre es requerido"),
-  files: z.array(z.instanceof(File)).optional(),
   description: z.string().min(1, "La descripción es requerida"),
   currentFunctions: z.array(z.object({
     description: z.string()
@@ -28,52 +25,35 @@ const formSchema = z.object({
   reports_to: z.string(),
 });
 
-// Tipo inferido del esquema
+type FormValues = z.infer<typeof formSchema>;
 
-// Props del componente
-interface AddPositionFormProps {
-  existingPositions: { id: string; data: {label:string, description:string}}[];
-
-  onClose: () => void;
-}
-type FormValues = {
-    label: string;
-    description: string;
-    currentFunctions: { description: string }[];
-    acquiredResponsibilities: { description: string }[];
-    qualifications: { description: string }[];
-    reports_to: string;
-    files: File[];
+interface EditPositionFormProps {
+  node: {
+    id: string;
+    data: {
+      label: string;
+      description: string;
+      currentFunctions: string[];
+      adquiredResposibilities: string[];
+      qualifications: string[];
+    };
   };
-  
+  existingPositions: { id: string; label: string, description: string }[];
+  onComplete: (updatedData: any) => void;
+  onCancel: () => void;
+}
 
-export function AddPositionForm({ existingPositions, onClose }: AddPositionFormProps) {
-  // Inicializar el formulario con React Hook Form
+export function EditPositionForm({ node, existingPositions, onComplete, onCancel }: EditPositionFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      label: "",
-      description: "",
-      currentFunctions: [],
-      acquiredResponsibilities: [],
-      qualifications: [],
-      reports_to: "",
-      files: []
+      label: node.data.label,
+      description: node.data.description,
+      currentFunctions: node.data.currentFunctions ? node.data.currentFunctions.map(func => ({ description: func })) : [],
+      acquiredResponsibilities: node.data.adquiredResposibilities ? node.data.adquiredResposibilities.map(resp => ({ description: resp })) : [],
+      qualifications: node.data.qualifications ? node.data.qualifications.map(qual => ({ description: qual })) : [],
+      reports_to: "",  // Asume que no tenemos esta información en el nodo
     },
-  });
-  // Configurar react-dropzone
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      form.setValue('files', acceptedFiles);
-    },
-  });
-
-
-
-
-  const { fields: qualificationFields, append: appendQualification, remove: removeQualification } = useFieldArray({
-    control: form.control,
-    name: "qualifications",
   });
 
   const { fields: currentFunctionsFields, append: appendCurrentFunction, remove: removeCurrentFunction } = useFieldArray({
@@ -86,23 +66,28 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
     name: "acquiredResponsibilities",
   });
 
+  const { fields: qualificationFields, append: appendQualification, remove: removeQualification } = useFieldArray({
+    control: form.control,
+    name: "qualifications",
+  });
+
   async function onSubmit(data: FormValues) {
     const formData = new FormData();
+    formData.append('id', node.id);
     formData.append('label', data.label);
     formData.append('description', data.description);
     formData.append('currentFunctions', JSON.stringify(data.currentFunctions.map(f => f.description)));
     formData.append('acquiredResponsibilities', JSON.stringify(data.acquiredResponsibilities.map(r => r.description)));
     formData.append('qualifications', JSON.stringify(data.qualifications.map(q => q.description)));
     formData.append('reports_to', data.reports_to);
-    
-    // Agregar archivos
-    if (data.files) {
-      data.files.forEach(file => formData.append('files', file));
+
+    const result = await actionUpdatePosition(formData);
+    if (result.success) {
+      onComplete(data);
+    } else {
+      // Manejar el error
+      console.error(result.message);
     }
-  
-    const result = await actionCreatePosition(formData);
-    form.reset();
-    onClose();
   }
 
   return (
@@ -115,7 +100,7 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
             <FormItem>
               <FormLabel>Nombre del puesto</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. Gerente de Ventas" {...field} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -129,7 +114,7 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
             <FormItem>
               <FormLabel>Descripción del puesto</FormLabel>
               <FormControl>
-                <Textarea placeholder="Breve descripción de las responsabilidades generales..." {...field} />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -151,7 +136,7 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
                 <SelectContent>
                   {existingPositions.map((position) => (
                     <SelectItem key={position.id} value={position.id}>
-                      {position.data.label}
+                      {position.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -160,34 +145,6 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
             </FormItem>
           )}
         />
-
-
-        <div>
-          <FormLabel>Calificaciones</FormLabel>
-          {qualificationFields.map((field, index) => (
-            <FormField
-              key={field.id}
-              control={form.control}
-              name={`qualifications.${index}.description`}
-              render={({ field }) => (
-                <FormItem className="flex items-center space-x-2 mt-2">
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeQualification(index)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendQualification({
-            description:""
-          })}>
-            Agregar Calificación
-          </Button>
-          <FormMessage>{form.formState.errors.qualifications?.message}</FormMessage>
-        </div>
 
         <div>
           <FormLabel>Funciones Actuales</FormLabel>
@@ -208,9 +165,7 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
               )}
             />
           ))}
-          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendCurrentFunction({
-            description:""
-          })}>
+          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendCurrentFunction({ description: "" })}>
             Agregar Función Actual
           </Button>
           <FormMessage>{form.formState.errors.currentFunctions?.message}</FormMessage>
@@ -235,31 +190,40 @@ export function AddPositionForm({ existingPositions, onClose }: AddPositionFormP
               )}
             />
           ))}
-          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendAcquiredResponsibility({
-            description:""
-          })}>
+          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendAcquiredResponsibility({ description: "" })}>
             Agregar Responsabilidad Adquirida
           </Button>
           <FormMessage>{form.formState.errors.acquiredResponsibilities?.message}</FormMessage>
         </div>
 
         <div>
-          <FormLabel>Archivos adjuntos</FormLabel>
-          <div {...getRootProps()} className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-blue-500 duration-150">
-            <input {...getInputProps()} />
-            <p>Arrastra y suelta archivos aquí, o haz clic para seleccionar archivos.  </p>
-          </div>
-          {acceptedFiles.length > 0 && (
-            <ul className="mt-2 text-sm grid grid-cols-2 gap-3">
-              {acceptedFiles.map((file) => (
-                <li key={file.name} className='p-3 bg-gray-300 font-medium rounded-md text-sm'>{file.name}</li>
-              ))}
-            </ul>
-          )}
+          <FormLabel>Calificaciones</FormLabel>
+          {qualificationFields.map((field, index) => (
+            <FormField
+              key={field.id}
+              control={form.control}
+              name={`qualifications.${index}.description`}
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2 mt-2">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeQualification(index)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </FormItem>
+              )}
+            />
+          ))}
+          <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => appendQualification({ description: "" })}>
+            Agregar Calificación
+          </Button>
+          <FormMessage>{form.formState.errors.qualifications?.message}</FormMessage>
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button type="submit" className='bg-blue-600 text-white'>Crear Posición</Button>
+          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" className='bg-blue-600 text-white'>Guardar Cambios</Button>
         </div>
       </form>
     </Form>
