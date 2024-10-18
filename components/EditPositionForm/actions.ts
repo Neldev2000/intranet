@@ -23,7 +23,7 @@ export async function actionUpdatePosition(formData: FormData) {
       SET label = ${label},
           description = ${description},
           current_functions = ${currentFunctions as any},
-          acquired_responsibilities = ${acquiredResponsibilities as any},
+          adquired_responsabilities = ${acquiredResponsibilities as any},
           qualifications = ${qualifications as any},
           reports_to = ${reports_to || null}
       WHERE id = ${id}

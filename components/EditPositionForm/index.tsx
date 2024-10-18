@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { actionUpdatePosition } from "./actions";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   label: z.string().min(1, "El nombre es requerido"),
@@ -70,7 +71,7 @@ export function EditPositionForm({ node, existingPositions, onComplete, onCancel
     control: form.control,
     name: "qualifications",
   });
-
+  const { toast } = useToast();
   async function onSubmit(data: FormValues) {
     const formData = new FormData();
     formData.append('id', node.id);
@@ -83,9 +84,20 @@ export function EditPositionForm({ node, existingPositions, onComplete, onCancel
 
     const result = await actionUpdatePosition(formData);
     if (result.success) {
+      toast({
+        title: "Éxito",
+        description: "La posición se ha actualizado correctamente.",
+        variant: "default",
+      });
       onComplete(data);
     } else {
       // Manejar el error
+      toast({
+        title: "Error",
+        description: result.message || "Ha ocurrido un error al actualizar la posición.",
+        variant: "destructive",
+      });
+      
       console.error(result.message);
     }
   }

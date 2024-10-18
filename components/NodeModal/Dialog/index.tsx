@@ -85,7 +85,7 @@ export function DialogNode({ isOpen, onClose, node, positions, handleDelete }: {
                 <div className="mt-4">
                     <h3 className="text-lg font-semibold">Responsibilidades Adquiridas:</h3>
                     <ul className="list-disc pl-5 text-gray-400">
-                        {node.data.adcquiredResponsibilities && node.data.adcquiredResponsibilities.map((resp: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined, index: React.Key | null | undefined) => (
+                        {node.data.adquiredResposibilities && node.data.adquiredResposibilities.map((resp: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined, index: React.Key | null | undefined) => (
                             <li key={index}>{resp}</li>
                         ))}
                     </ul>
