@@ -23,7 +23,7 @@ export async function actionCreatePosition(formData: FormData) {
 
     // Insertar en la base de datos
     const { rows } = await sql`
-      INSERT INTO positions (label, description, current_functions, acquired_responsabilities, qualifications, reports_to)
+      INSERT INTO positions (label, description, current_functions, adquired_responsabilities, qualifications, reports_to)
       VALUES (${label}, ${description}, ${currentFunctions as any}, ${acquiredResponsibilities as any}, ${qualifications as any}, ${reports_to || null})
       RETURNING id
     `;

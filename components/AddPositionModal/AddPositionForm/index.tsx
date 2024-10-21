@@ -14,7 +14,7 @@ import { ActionData } from './interface';
 // Define el esquema de validación con Zod
 const formSchema = z.object({
   label: z.string().min(1, "El nombre es requerido"),
-  files: z.array(z.instanceof(File)).optional(),
+  files: z.array(z.any()).optional(), // Cambiado de z.instanceof(File) a z.any()
   description: z.string().min(1, "La descripción es requerida"),
   currentFunctions: z.array(z.object({
     description: z.string()
