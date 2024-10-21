@@ -23,11 +23,15 @@ interface DrawerAddPositionProps {
 export function DrawerAddPosition({ isOpen, onClose, onAdd, existingNodes }: DrawerAddPositionProps) {
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="text-gray-500 px-4 max-h-[600px] overflow-y-auto">
-        <DrawerHeader>
-          <DrawerTitle>Nuevo Cargo</DrawerTitle>
-        </DrawerHeader>
-        <AddPositionForm  existingPositions={existingNodes} onClose={onClose} />
+      <DrawerContent className="text-gray-500">
+        <div className="h-[calc(100vh-10rem)] flex flex-col">
+          <DrawerHeader className="flex-shrink-0">
+            <DrawerTitle>Nuevo Cargo</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-grow overflow-y-auto px-4">
+            <AddPositionForm existingPositions={existingNodes} onClose={onClose}  />
+          </div>
+        </div>
       </DrawerContent>
     </Drawer>
   );

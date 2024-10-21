@@ -18,7 +18,7 @@ const SideBar= async () => {
   }
   return (
     <div className="bg-white h-full w-full p-5 text-gray-700 flex flex-col gap-5">
-      <h2 className='text-3xl font-bold'>Trabajadores</h2>
+      <h2 className='text-2xl lg:text-3xl font-bold'>Trabajadores</h2>
       <DialogEmployee />
       <EmployeeList employees={data} />
     </div>
